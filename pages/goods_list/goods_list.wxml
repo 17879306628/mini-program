@@ -1,0 +1,9 @@
+<SearchInput/>
+<Tabs 
+  title="{{title}}"
+  bind:titleItemChange="handleItemChange"
+  >
+    <block wx:if="{{title[0].isActive}}">0</block>
+    <block wx:if="{{title[1].isActive}}">1</block>
+    <block wx:if="{{title[2].isActive}}">2</block>
+  </Tabs>
