@@ -1,11 +1,15 @@
 import request from '../../request/network'
 Page({
   data: {
-    detailObj: {}
+    detailObj: {},
+    isCollected: false
   },
   // 全局详情数据对象
   DetailInfo: {},
-  onLoad: function (options) {
+  onShow: function () {
+    let curPages =  getCurrentPages();
+    let currentPages = curPages[curPages.length - 1]
+    let options = currentPages.options
     const goods_id = options.goods_id
     this.getGoodsDetail(goods_id)
   },
@@ -17,13 +21,17 @@ Page({
     }).then(res => {
       const detailObj = res.data.message
       this.DetailInfo = detailObj
+      // 从缓存中取出收藏数组
+      const collect = wx.getStorageSync('collect') || [];
+      let isCollected = collect.some(v=>v.goods_id===this.DetailInfo.goods_id)
       this.setData({
         detailObj: {
           pics: detailObj.pics,
           goods_name: detailObj.goods_name,
           goods_price: detailObj.goods_price,
           goods_introduce: detailObj.goods_introduce.replace(/\.webp/g, '.jpg')
-        }
+        },
+        isCollected
       })
     })
   },
@@ -58,5 +66,49 @@ Page({
       icon: 'success',
       mask: true
     })
+  },
+  // 点击收藏
+  handleCollectClick() {
+    const userInfo = wx.getStorageSync('userinfo');
+    if(userInfo.nickName) {
+      // 有登录角色
+      let isCollected = !this.data.isCollected
+      let collect = wx.getStorageSync('collect') || [];
+      if(isCollected) {
+        // 是收藏
+        const {goods_id,goods_name,goods_price,goods_small_logo} = this.DetailInfo
+        collect.push({goods_id,goods_name,goods_price,goods_small_logo,isCollected})
+        wx.setStorageSync('collect', collect);
+        this.setData({
+          isCollected
+        })
+        wx.showToast({
+          title: '收藏成功',
+          icon: 'success',
+          duration: 1500,
+          mask: true
+        })
+          
+      } else {
+        // 取消收藏
+        collect = collect.filter(v=>!(v.goods_id===this.DetailInfo.goods_id))
+        wx.setStorageSync('collect', collect);
+        this.setData({
+          isCollected
+        })
+        wx.showToast({
+          title: '取消收藏',
+          icon: 'success',
+          duration: 1500,
+          mask: true
+        })
+      }
+    } else {
+      // 没有登录角色
+      wx.navigateTo({
+        url: '/pages/login/login'
+      })
+    }
+    
   }
 })
