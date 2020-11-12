@@ -30,7 +30,8 @@ Page({
   // 总页数设置
   totalPages: 0,
   onLoad: function (options) {
-    this.QueryParmas.cid = options.cid
+    this.QueryParmas.cid = options.cid || ''
+    this.QueryParmas.query = options.query || ''
     this.getGoodsList()
   },
   // 发送请求获取数据

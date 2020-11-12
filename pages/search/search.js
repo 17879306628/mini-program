@@ -1,66 +1,48 @@
-// pages/search/search.js
+import request from '../../request/network'
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    goods: [],
+    // 控制按钮显示和隐藏
+    isShow: false,
+    inputValue: ''
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  TimeId: -1,
+  handleInput(e) {
+    // 获取输入框输入的值
+    const value = e.detail.value
+    clearTimeout(this.TimeId)
+    // 判断输入框是否为空
+    if(!value.trim()) {
+      this.setData({
+        isShow: false,
+        goods: []
+      })
+      return;
+    } else {
+      // 发送请求
+      // 使用定时器产生节流效果
+      this.setData({
+        isShow: true
+      })
+      this.TimeId = setTimeout(() => {
+        this.getSearch(value)
+      },1000)
+    }
+    
+    
   },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+  async getSearch(query) {
+    const res = await request({url:'/goods/qsearch',data:{query}})
+    this.setData({
+      goods: res.data.message
+    })
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+  // 点击按钮，取消输入框的值
+  handelCancle() {
+    this.setData({
+      goods: [],
+      isShow: false,
+      inputValue: ''
+    })
   }
 })
